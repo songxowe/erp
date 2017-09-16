@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.MdesignProcedureMapper">
+
+	<resultMap type="com.softfactory.pojo.MdesignProcedure" id="mdesignProcedure-result">
+		<id property="id" column="ID" />
+		<result property="designId" column="DESIGN_ID" />
+		<result property="firstKindId" column="FIRST_KIND_ID" />
+		<result property="firstKindName" column="FIRST_KIND_NAME" />
+		<result property="secondKindId" column="SECOND_KIND_ID" />
+		<result property="secondKindName" column="SECOND_KIND_NAME" />
+		<result property="thirdKindId" column="THIRD_KIND_ID" />
+		<result property="thirdKindName" column="THIRD_KIND_NAME" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="procedureDescribe" column="PROCEDURE_DESCRIBE" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="moduleCostPriceSum" column="MODULE_COST_PRICE_SUM" />
+		<result property="designer" column="DESIGNER" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="checkSuggestion" column="CHECK_SUGGESTION" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="changer" column="CHANGER" />
+		<result property="changeTime" column="CHANGE_TIME" />
+		<result property="changeTag" column="CHANGE_TAG" />
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG" />
+		<result property="designModuleChangeTag" column="DESIGN_MODULE_CHANGE_TAG" />
+	</resultMap>
+	<sql id="pageSQLHead">
+		select ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,COST_PRICE_SUM,DESIGNER,REGISTER_TIME,CHECK_TAG from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'designId'">DESIGN_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<when test="sort == 'checkTag'">CHECK_TAG</when>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereClase">
+		<where>
+			1 = 1
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+			and CHECK_TAG = #{checkTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="mdesignProcedure-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,m.* from M_DESIGN_PROCEDURE m
+		<include refid="WhereClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+
+	<select id="findPagerTotal" resultType="long">
+		select count(DESIGN_ID) from M_DESIGN_PROCEDURE
+		<include refid="WhereClase" />
+	</select>
+
+	<select id="findById" resultMap="mdesignProcedure-result" parameterType="String">
+	select * from M_DESIGN_PROCEDURE  where PRODUCT_ID = #{id}
+	</select>
+	<select id="checkfind" resultMap="mdesignProcedure-result" parameterType="int">
+		select * from M_DESIGN_PROCEDURE where ID = #{id}
+	</select>
+	
+</mapper>

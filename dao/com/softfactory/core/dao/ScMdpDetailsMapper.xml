@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.ScMdpDetailsMapper">
+
+	<resultMap type="com.softfactory.pojo.MdpDetails" id="mdpDetailsMap">
+		<id property="id" column="ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="procedureName" column="PROCEDURE_NAME" />
+		<result property="procedureId" column="PROCEDURE_ID" />
+		<result property="procedureDescribe" column="PROCEDURE_DESCRIBE" />
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="moduleSubtotal" column="MODULE_SUBTOTAL" />		
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select * from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'detailsNumber'">DETAILS_NUMBER</when>
+				<when test="sort == 'procedureName'">PROCEDURE_NAME</when>
+				<when test="sort == 'procedureId'">PROCEDURE_ID</when>
+				<when test="sort == 'procedureDescribe'">PROCEDURE_DESCRIBE</when>
+				<when test="sort == 'labourHourAmount'">LABOUR_HOUR_AMOUNT</when>
+				<when test="sort == 'subtotal'">SUBTOTAL</when>
+				<when test="sort == 'moduleSubtotal'">MODULE_SUBTOTAL</when>
+				<otherwise>PROCEDURE_NAME</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			s.DESIGN_MODULE_TAG='D002-0' 
+			and m.DESIGN_ID = #{designId}
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="mdpDetailsMap">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		)rn, s.DETAILS_NUMBER,s.PROCEDURE_NAME,s.PROCEDURE_ID,
+		s.PROCEDURE_DESCRIBE,s.LABOUR_HOUR_AMOUNT,
+		s.SUBTOTAL,MODULE_SUBTOTAL from M_DESIGN_PROCEDURE_DETAILS s,M_DESIGN_PROCEDURE m 
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(PROCEDURE_NAME) from M_DESIGN_PROCEDURE_DETAILS s,M_DESIGN_PROCEDURE m
+		<include refid="WhereCase" />
+	</select>
+</mapper>

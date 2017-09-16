@@ -1,0 +1,299 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softfactory.core.dao.LiDaWeiScellMapper">
+	<resultMap type="com.softfactory.pojo.Scell" id="scell-result">
+		<id property="id" column="ID" jdbcType="NUMERIC" />
+		<result property="storeId" column="STORE_ID" jdbcType="VARCHAR" />
+		<result property="storeName" column="STORE_NAME" jdbcType="VARCHAR" />
+		<result property="productId" column="PRODUCT_ID" jdbcType="VARCHAR" />
+		<result property="productName" column="PRODUCT_NAME" jdbcType="VARCHAR" />
+		<result property="firstKingId" column="FIRST_KIND_ID" jdbcType="VARCHAR" />
+		<result property="firstKingName" column="FIRST_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="secondKingId" column="SECOND_KIND_ID"
+			jdbcType="VARCHAR" />
+		<result property="secondKingName" column="SECOND_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="thirdKingId" column="THIRD_KIND_ID" jdbcType="VARCHAR" />
+		<result property="thirdKingName" column="THIRD_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="minAmount" column="MIN_AMOUNT" jdbcType="BIGINT" />
+		<result property="maxAmount" column="MAX_AMOUNT" jdbcType="BIGINT" />
+		<result property="maxCapacityAmount" column="MAX_CAPACITY_AMOUNT"
+			jdbcType="BIGINT" />
+		<result property="locId" column="LOC_ID" jdbcType="VARCHAR" />
+		<result property="locName" column="LOC_NAME" jdbcType="VARCHAR" />
+		<result property="splName" column="SPL_NAME" jdbcType="VARCHAR" />
+		<result property="storageUnit" column="STORAGE_UNIT" jdbcType="VARCHAR" />
+		<result property="amount" column="AMOUNT" jdbcType="BIGINT" />
+		<result property="config" column="CONFIG" jdbcType="VARCHAR" />
+		<result property="designer" column="DESIGNER" jdbcType="VARCHAR" />
+		<result property="register" column="REGISTER" jdbcType="VARCHAR" />
+		<result property="registerTime" column="REGISTER_TIME"
+			jdbcType="DATE" />
+		<result property="checker" column="CHECKER" jdbcType="VARCHAR" />
+		<result property="checkTime" column="CHECK_TIME" jdbcType="DATE" />
+		<result property="checkTag" column="CHECK_TAG" jdbcType="VARCHAR" />
+		<result property="productType" column="TYPE" jdbcType="VARCHAR" />
+		<result property="productClass" column="PRODUCT_CLASS"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.Dkind" id="dking-result">
+		<id property="id" column="ID" />
+		<result property="pid" column="P_ID" />
+		<result property="kindId" column="KIND_ID" />
+		<result property="kindName" column="KIND_NAME" />
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select * from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">d.PRODUCT_ID</when>
+				<when test="sort == 'storeId'">d.STORE_ID</when>
+				<when test="sort == 'productName'">d.PRODUCT_NAME</when>
+				<when test="sort == 'productType'">d.TYPE</when>
+				<when test="sort == 'firstKingName'">d.FIRST_KIND_NAME</when>
+				<when test="sort == 'secondKingName'">d.SECOND_KIND_NAME</when>
+				<when test="sort == 'thirdKingName'">d.THIRD_KIND_NAME</when>
+				<when test="sort == 'registerTime'">s.REGISTER_TIME</when>
+				<when test="sort == 'checkTag'">s.CHECK_TAG</when>
+				<otherwise>d.PRODUCT_ID</otherwise>
+			</choose>
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="orderBy1">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">s.PRODUCT_ID</when>
+				<when test="sort == 'storeId'">s.STORE_ID</when>
+				<when test="sort == 'productName'">s.PRODUCT_NAME</when>
+				<when test="sort == 'amount'">s.AMOUNT</when>
+				<when test="sort == 'minAmount'">s.MIN_AMOUNT</when>
+				<when test="sort == 'maxAmount'">s.MAX_AMOUNT</when>
+				<otherwise>s.AMOUNT</otherwise>
+			</choose>
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereOneClase">
+		<if
+			test="firstKingName != null and firstKingName != '' and firstKingName !=-1 ">
+			and d.FIRST_KIND_ID = #{firstKingName}
+		</if>
+		<if
+			test="secondKingName != null and secondKingName != '' and secondKingName !=-1">
+			and d.SECOND_KIND_ID = #{secondKingName}
+		</if>
+		<if
+			test="thirdKingName != null and thirdKingName != '' and thirdKingName !=-1">
+			and d.THIRD_KIND_ID = #{thirdKingName}
+		</if>
+		<if test="str != null and str != ''">
+			and (d.PRODUCT_ID like #{str} or d.PRODUCT_NAME like #{str} or
+			d.TYPE like #{str} or d.PRODUCT_CLASS like #{str} or d.FIRST_KIND_NAME like
+			#{str}
+			or d.SECOND_KIND_NAME like #{str} or d.THIRD_KIND_NAME like #{str})
+		</if>
+		<if test="beginDate != null and endDate != null">
+			and REGISTER_TIME between #{beginDate} and #{endDate}
+		</if>
+	</sql>
+
+	<sql id="WhereThreeClase">
+		<where>
+			1=1
+			<if
+				test="firstKingName != null and firstKingName != '' and firstKingName !=-1">
+				and s.FIRST_KIND_ID =#{firstKingName}
+			</if>
+			<if
+				test="secondKingName != null and secondKingName != '' and secondKingName !=-1">
+				and s.SECOND_KIND_ID =#{secondKingName}
+			</if>
+			<if
+				test="thirdKingName != null and thirdKingName != '' and thirdKingName !=-1">
+				and s.THIRD_KIND_ID = #{thirdKingName}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+				and s.CHECK_TAG like #{checkTag}
+			</if>
+			<if test="str != null and str != ''">
+				and (s.STORE_ID like #{str} or s.PRODUCT_ID like #{str} or
+				s.PRODUCT_NAME like #{str} or
+				s.CHECK_TAG like #{str})
+			</if>
+			<if test="firstdate != null and lastdate != null">
+				and s.REGISTER_TIME between #{firstdate} and #{lastdate}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="WhereFourClase">
+		<if
+			test="firstKingName != null and firstKingName != '' and firstKingName !=-1">
+			and s.FIRST_KIND_ID =#{firstKingName}
+		</if>
+		<if
+			test="secondKingName != null and secondKingName != '' and secondKingName !=-1">
+			and s.SECOND_KIND_ID =#{secondKingName}
+		</if>
+		<if
+			test="thirdKingName != null and thirdKingName != '' and thirdKingName !=-1">
+			and s.THIRD_KIND_ID = #{thirdKingName}
+		</if>
+		<if test="str != null and str != ''">
+			and (s.STORE_ID like #{str} or s.PRODUCT_ID like #{str} or
+			s.PRODUCT_NAME like #{str} or
+			d.TYPE like #{str} or d.FIRST_KIND_NAME like #{str} or d.SECOND_KIND_NAME
+			like #{str} or d.THIRD_KIND_NAME like #{str})
+		</if>
+		<if test="firstdate != null and lastdate != null">
+			and s.REGISTER_TIME between #{firstdate} and #{lastdate}
+		</if>
+	</sql>
+
+	<sql id="WhereFiveClase">
+		<if
+			test="firstKingName != null and firstKingName != '' and firstKingName !=-1">
+			and s.FIRST_KIND_ID =#{firstKingName}
+		</if>
+		<if
+			test="secondKingName != null and secondKingName != '' and secondKingName !=-1">
+			and s.SECOND_KIND_ID =#{secondKingName}
+		</if>
+		<if
+			test="thirdKingName != null and thirdKingName != '' and thirdKingName !=-1">
+			and s.THIRD_KIND_ID = #{thirdKingName}
+		</if>
+		<if test="str != null and str != ''">
+			and (s.FIRST_KIND_NAME like #{str} or s.SECOND_KIND_NAME like #{str} or
+			s.THIRD_KIND_NAME like #{str} or
+			s.AMOUNT like #{str} or s.MIN_AMOUNT like #{str} or s.MAX_AMOUNT like #{str})
+		</if>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<!-- 查询第二个页面 -->
+	<select id="findTwoPager" resultMap="scell-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.STORE_ID,s.PRODUCT_ID ,d.PRODUCT_NAME,d.TYPE,
+		d.FIRST_KIND_NAME,d.SECOND_KIND_NAME,d.THIRD_KIND_NAME,
+		s.REGISTER_TIME from S_CELL s,D_FILE d where s.product_id=d.product_id
+		and s.CHECK_TAG != 'S005-2'
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findTwoPagerTotal" resultType="long">
+		select count(s.id)
+		from S_CELL s,D_FILE d where s.product_id=d.product_id and s.CHECK_TAG
+		!= 'S005-2'
+	</select>
+
+	<!-- 查询第一个页面 -->
+	<select id="findOnePager" resultMap="scell-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,d.PRODUCT_ID,d.PRODUCT_NAME ,d.TYPE,d.PRODUCT_CLASS,
+		d.FIRST_KIND_NAME,d.SECOND_KIND_NAME,d.THIRD_KIND_NAME
+		from D_FILE d where d.DESIGN_CELL_TAG='K001-0' and d.CHECK_TAG='S001-1'
+		<include refid="WhereOneClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findOnePagerTotal" resultType="long">
+		select count(d.id) from D_FILE d where d.DESIGN_CELL_TAG='K001-0' and
+		d.CHECK_TAG='S001-1'
+		<include refid="WhereOneClase" />
+	</select>
+
+	<!-- 查询第三个页面 -->
+	<select id="findThreePager" resultMap="scell-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy1" />
+		) rn,s.STORE_ID,s.PRODUCT_ID ,s.PRODUCT_NAME,s.CHECK_TAG
+		from S_CELL s
+		<include refid="WhereThreeClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findThreePagerTotal" resultType="long">
+		select count(s.id) from S_CELL s
+		<include refid="WhereThreeClase" />
+	</select>
+
+	<!-- 查询第四个页面 -->
+	<select id="findFourPager" resultMap="scell-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.STORE_ID,s.PRODUCT_ID ,s.PRODUCT_NAME,d.TYPE,d.FIRST_KIND_NAME,
+		d.SECOND_KIND_NAME,d.THIRD_KIND_NAME,s.REGISTER_TIME from S_CELL
+		s,D_FILE d where s.product_id=d.product_id and s.CHECK_TAG='S005-2'
+		<include refid="WhereFourClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findFourPagerTotal" resultType="long">
+		select count(s.id) from S_CELL s,D_FILE d where
+		s.product_id=d.product_id and s.CHECK_TAG='S005-2'
+		<include refid="WhereFourClase" />
+	</select>
+
+	<!-- 查询第五个页面 -->
+	<select id="findFivePager" resultMap="scell-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy1" />
+		) rn,s.PRODUCT_ID
+		,s.PRODUCT_NAME,s.FIRST_KIND_NAME,s.AMOUNT,s.MIN_AMOUNT,s.MAX_AMOUNT,
+		s.SECOND_KIND_NAME,s.THIRD_KIND_NAME from S_CELL s,S_PAY
+		p,S_PAY_DETAILS d where s.product_id=d.product_id and
+		p.ID=d.PARENT_ID and p.STORE_TAG='K002-1'
+		<include refid="WhereFiveClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findFivePagerTotal" resultType="long">
+		select count(s.id) from S_CELL s,S_PAY p,S_PAY_DETAILS d where
+		s.product_id=d.product_id and p.PAY_ID=d.PARENT_ID and
+		p.STORE_TAG='K002-1'
+		<include refid="WhereFiveClase" />
+	</select>
+
+	<!-- 根据Id查询档案表数据 -->
+	<select id="findById" resultMap="scell-result">
+		select
+		PRODUCT_ID,PRODUCT_NAME,FIRST_KIND_ID,FIRST_KIND_NAME,SECOND_KIND_ID,SECOND_KIND_NAME,THIRD_KIND_ID,THIRD_KIND_NAME
+		from D_FILE where PRODUCT_ID=#{id}
+	</select>
+
+	<!-- 三级联动 -->
+	<select id="findAll" resultMap="dking-result">
+		select * from D_CONFIG_FILE_KIND a
+		<include refid="Wherecase" />
+	</select>
+
+	<sql id="Wherecase">
+		<where>
+			1=1
+			<if test="pid == null || pid == 0">
+				and a.P_ID is null
+			</if>
+			<if test="pid != null and pid != 0">
+				and a.P_ID =#{pid}
+			</if>
+		</where>
+	</sql>
+
+</mapper>

@@ -1,0 +1,3 @@
+eclipse.preferences.version=1
+validator.Checked=WebRoot/xyfdfiledelete.jsp,WebRoot/lbquery_material.jsp,WebRoot/Dispatching/disview.jsp,WebRoot/payfilelist.jsp,WebRoot/lbverify.jsp,WebRoot/xyfdfilelist.jsp,WebRoot/lbproducts.jsp,dao/com/softfactory/core/dao/LbManufactureMapper.java,WebRoot/lbcheckmaterial.jsp,WebRoot/lbquery_builder.jsp,WebRoot/xyfdfilechangelist.jsp,WebRoot/userrole.jsp,WebRoot/userlist.jsp,WebRoot/menulist.jsp,WebRoot/xyfdfilecheck.jsp,WebRoot/lbquery_details.jsp,WebRoot/xyfdfilechange.jsp,WebRoot/lbcheckinput.jsp,WebRoot/lbmaterial.jsp,controller/com/softfactory/core/controller/LbQueryController.java,WebRoot/lbquery_labor.jsp,WebRoot/lbquery_materiel.jsp,WebRoot/lbcheckreview.jsp,WebRoot/rolelist.jsp
+validator.Unchecked=

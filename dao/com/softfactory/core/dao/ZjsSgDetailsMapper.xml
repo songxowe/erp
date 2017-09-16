@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.softfactory.core.dao.ZjsSgDetailsMapper">
+
+	<resultMap type="com.softfactory.pojo.SgDetails" id="sgDetails-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="gatheredAmount" column="GATHERED_AMOUNT" />
+		<result property="gatherTag" column="GATHER_TAG" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.Dfile" id="dfile-result">
+		<id property="id" column="ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="realCostPrice" column="REAL_COST_PRICE" />
+		<result property="productDescibe" column="PRODUCT_DESCRIBE" />
+		<result property="designCellTag" column="DESIGN_CELL_TAG" />
+	</resultMap>
+	
+	
+
+	<sql id="pageSQLHead">
+		select ID,PARENT_ID,PRODUCT_ID,PRODUCT_NAME,
+		PRODUCT_DESCRIBE,AMOUNT,AMOUNT_UNIT,COST_PRICE,SUBTOTAL,GATHERED_AMOUNT,
+		GATHER_TAG from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'parentId'">PARENT_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+      1=1 
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="sgDetails-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.* from S_GATHER_DETAILS s
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from S_GATHER_DETAILS
+		<include refid="WhereCase" />
+	</select>
+	
+	<select id="findById" resultMap="sgDetails-result">
+       select * from S_GATHER_DETAILS where PARENT_ID= #{productId}
+    </select>
+</mapper>

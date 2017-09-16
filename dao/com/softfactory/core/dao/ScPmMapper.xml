@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.ScPmMapper">
+
+	<resultMap type="com.softfactory.pojo.dto.Pm" id="pmMap">
+		<id property="detid" column="detid" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="costPrice" column="COST_PRICE" />					
+	</resultMap>
+	
+	<select id="findByProductId" resultMap="pmMap">
+		Select det.parent_id detid,det.PRODUCT_ID,det.PRODUCT_NAME,
+		det.PRODUCT_DESCRIBE,det.AMOUNT,det.AMOUNT_UNIT,det. COST_PRICE 
+		from D_MODULE d,D_MODULE_DETAILS det where d.ID=det.PARENT_ID 
+		and d.PRODUCT_ID=#{ProductId} and det.TYPE='Y001-2'order by  det.id asc
+	</select>
+
+	
+</mapper>

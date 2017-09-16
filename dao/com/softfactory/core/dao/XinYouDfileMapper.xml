@@ -1,0 +1,306 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.XinYouDfileMapper">
+	<resultMap type="com.softfactory.pojo.Dfile" id="dfile-result">
+		<id property="id" column="ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="factoryName" column="FACTORY_NAME" />
+		<result property="firstKindId" column="FIRST_KIND_ID" />
+		<result property="firstKindName" column="FIRST_KIND_NAME" />
+		<result property="secondKindId" column="SECOND_KIND_ID" />
+		<result property="secondKindName" column="SECOND_KIND_NAME" />
+		<result property="thirdKindId" column="THIRD_KIND_ID" />
+		<result property="thirdKindName" column="THIRD_KIND_NAME" />
+		<result property="productNick" column="PRODUCT_NICK" />
+		<result property="type" column="TYPE" />
+		<result property="productClass" column="PRODUCT_CLASS" />
+		<result property="personalUnit" column="PERSONAL_UNIT" />
+		<result property="personalValue" column="PERSONAL_VALUE" />
+		<result property="listPrice" column="LIST_PRICE" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="realCostPrice" column="REAL_COST_PRICE" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="responsiblePerson" column="RESPONSIBLE_PERSON" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="changer" column="CHANGER" />
+		<result property="changeTime" column="CHANGER_TIME" />
+		<result property="changeTag" column="CHANGE_TAG" />
+		<result property="priceChangeTag" column="PRICE_CHANGE_TAG" />
+		<result property="fileChangeAmount" column="FILE_CHANGE_AMOUNT" />
+		<result property="deleteTag" column="DELETE_TAG" />
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG" />
+		<result property="designProcedureTag" column="DESIGN_PROCEDURE_TAG" />
+		<result property="designCellTag" column="DESIGN_CELL_TAG" />				
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select ID,PRODUCT_ID,PRODUCT_NAME,PRODUCT_CLASS,FIRST_KIND_NAME,SECOND_KIND_NAME,THIRD_KIND_NAME,TYPE from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<when test="sort == 'costPrice'">COST_PRICE</when>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			1=1
+			<if test="firstKindName != null and firstKindName != ''">
+				and FIRST_KIND_NAME = #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME = #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME = #{thirdKindName}
+			</if>
+			<if test="type != null and type != ''">
+				and TYPE = #{type}
+			</if>
+			<if test="beginTime != null and endTime != null">
+        		and REGISTER_TIME between #{beginTime} and #{endTime}
+     		</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="dfile-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,d.* from D_FILE d
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from D_FILE
+		<include refid="WhereCase" />
+	</select>
+	
+	<insert id="add" parameterType="com.softfactory.pojo.Dfile">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select SEQ_SYS_CODES.nextval from dual
+		</selectKey>
+		insert into
+		D_FILE(ID,PRODUCT_ID,PRODUCT_NAME,FACTORY_NAME,FIRST_KIND_ID,FIRST_KIND_NAME,
+		SECOND_KIND_ID,SECOND_KIND_NAME,THIRD_KIND_ID,THIRD_KIND_NAME,PRODUCT_NICK,
+		TYPE,PRODUCT_CLASS,PERSONAL_UNIT,PERSONAL_VALUE,LIST_PRICE,COST_PRICE,
+		PRODUCT_DESCRIBE,RESPONSIBLE_PERSON,REGISTER,REGISTER_TIME,CHECKER,CHECK_TAG,
+		CHANGE_TAG,PRICE_CHANGE_TAG,DELETE_TAG,DESIGN_MODULE_TAG,DESIGN_PROCEDURE_TAG,
+		DESIGN_CELL_TAG) 
+		values(#{id,jdbcType=NUMERIC},#{productId,jdbcType=VARCHAR},#{productName,jdbcType=VARCHAR},
+		#{factoryName,jdbcType=VARCHAR},#{firstKindId,jdbcType=VARCHAR},#{firstKindName,jdbcType=VARCHAR},
+		#{secondKindId,jdbcType=VARCHAR},#{secondKindName,jdbcType=VARCHAR},#{thirdKindId,jdbcType=VARCHAR},
+		#{thirdKindName,jdbcType=VARCHAR},#{productNick,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},
+		#{productClass,jdbcType=VARCHAR},#{personalUnit,jdbcType=VARCHAR},#{personalValue,jdbcType=VARCHAR},
+		#{listPrice,jdbcType=NUMERIC},#{costPrice,jdbcType=NUMERIC},
+		#{productDescribe,jdbcType=VARCHAR},#{responsiblePerson,jdbcType=VARCHAR},#{register,jdbcType=VARCHAR},
+		#{registerTime,jdbcType=DATE},#{checker,jdbcType=VARCHAR},#{checkTag,jdbcType=VARCHAR},
+		#{changeTag,jdbcType=VARCHAR},#{priceChangeTag,jdbcType=VARCHAR},#{deleteTag,jdbcType=VARCHAR},
+		#{designModuleTag},#{designProcedureTag},#{designCellTag,jdbcType=VARCHAR})
+	</insert>
+	
+	<update id="modify" parameterType="com.softfactory.pojo.Dfile">
+		update D_FILE set FACTORY_NAME=#{factoryName,jdbcType=VARCHAR},FIRST_KIND_ID=#{firstKindId,jdbcType=VARCHAR},
+		FIRST_KIND_NAME=#{firstKindName,jdbcType=VARCHAR},SECOND_KIND_ID=#{secondKindId,jdbcType=VARCHAR},
+		SECOND_KIND_NAME=#{secondKindName,jdbcType=VARCHAR},THIRD_KIND_ID=#{thirdKindId,jdbcType=VARCHAR},
+		THIRD_KIND_NAME=#{thirdKindName,jdbcType=VARCHAR},PRODUCT_CLASS=#{productClass,jdbcType=VARCHAR},
+		PERSONAL_UNIT=#{personalUnit,jdbcType=VARCHAR},PERSONAL_VALUE=#{personalValue,jdbcType=VARCHAR},
+		PRODUCT_DESCRIBE=#{productDescribe,jdbcType=VARCHAR},RESPONSIBLE_PERSON=#{responsiblePerson,jdbcType=VARCHAR},
+		CHECK_TAG=#{checkTag,jdbcType=VARCHAR},CHANGE_TAG=#{changeTag,jdbcType=VARCHAR}
+		where ID=#{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="remove" parameterType="int">
+		delete from D_FILE where ID=#{id,jdbcType=NUMERIC}
+	</delete>
+	 
+	<select id="findById" parameterType="int" resultMap="dfile-result">
+		select * from D_FILE where ID=#{id}
+	</select>
+			
+	<select id="findByCheckTag" parameterType="String" resultMap="dfile-result">
+		select * from D_FILE where CHECK_TAG=#{checkTag}
+	</select>
+	
+	
+	
+	
+	
+	
+	<!-- 商品的分页查询 -->
+	<sql id="CommoditypageSQLHead">
+		select ID,PRODUCT_ID,PRODUCT_NAME,PRODUCT_CLASS,FIRST_KIND_NAME,SECOND_KIND_NAME,THIRD_KIND_NAME,TYPE from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="CommodityorderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="CommodityWhereCase">
+		<where>
+		  TYPE  ='Y001-1'  and DESIGN_MODULE_TAG  ='W001-0'
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				and FACTORY_NAME LIKE #{factoryName}
+			</if>
+			<if test="firstKindName != null and firstKindName != ''">
+				and FIRST_KIND_NAME LIKE #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME LIKE #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME LIKE #{thirdKindName}
+			</if>
+			<if test="productDescribe != null and productDescribe != ''">
+        		and PRODUCT_DESCRIBE  LIKE #{productDescribe} 
+     		</if>
+			<if test="responsiblePerson != null and responsiblePerson != ''">
+				and RESPONSIBLE_PERSON LIKE #{responsiblePerson}
+			</if>
+			<if test="registerTime != null and registerTime != ''">
+        		and REGISTER_TIME  =#{registerTime} 
+     		</if>
+		</where>
+	</sql>
+
+	<sql id="CommoditypageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findCommodityPager" resultMap="dfile-result">
+		<include refid="CommoditypageSQLHead" />
+		<include refid="CommodityorderBy" />
+		) rn,d.* from D_FILE d
+		<include refid="CommodityWhereCase" />
+		<include refid="CommoditypageSQLFoot" />
+	</select>
+
+	<select id="findCommodityTotal" resultType="long">
+		select count(id) from D_FILE 
+		<include refid="CommodityWhereCase" />
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	<!-- 物料的分页查询 -->
+	<sql id="MaterialpageSQLHead">
+		select ID,PRODUCT_ID,PRODUCT_NAME,TYPE,PRODUCT_DESCRIBE,PERSONAL_UNIT,COST_PRICE from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="MaterialorderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="MaterialWhereCase">
+		<where>
+			TYPE = 'Y001-2' or TYPE='Y001-3'
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="factoryName != null and factoryName != ''">
+				and FACTORY_NAME LIKE #{factoryName}
+			</if>
+			<if test="firstKindName != null and firstKindName != ''">
+				and FIRST_KIND_NAME LIKE #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME LIKE #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME LIKE #{thirdKindName}
+			</if>
+			<if test="productDescribe != null and productDescribe != ''">
+        		and PRODUCT_DESCRIBE  LIKE #{productDescribe} 
+     		</if>
+			<if test="responsiblePerson != null and responsiblePerson != ''">
+				and RESPONSIBLE_PERSON LIKE #{responsiblePerson}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="MaterialpageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findMaterialPager" resultMap="dfile-result">
+		<include refid="MaterialpageSQLHead" />
+		<include refid="MaterialorderBy" />
+		) rn,d.* from D_FILE d
+		<include refid="MaterialWhereCase" />
+		<include refid="MaterialpageSQLFoot" />
+	</select>
+
+	<select id="findMaterialTotal" resultType="long">
+		select count(id) from D_FILE 
+		<include refid="MaterialWhereCase" />
+	</select>
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+</mapper>

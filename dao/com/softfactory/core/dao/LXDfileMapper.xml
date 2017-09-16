@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.LXDfileMapper">
+	<!-- 新生产计划所需查询所有已经过审的产品档案信息 返回值 -->
+	<resultMap type="com.softfactory.pojo.Dfile" id="dfileResult">
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="type" column="TYPE" />
+		<result property="register" column="REGISTER" />
+		<result property="personalUnit" column="PERSONAL_UNIT" />
+		<result property="listPrice" column="LIST_PRICE" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+	</resultMap>
+	<!-- 新生产计划所需查询所有已经过审的产品档案信息 -->
+	<sql id="pageSQLHead">
+		select
+		PRODUCT_ID,PRODUCT_NAME,TYPE,PERSONAL_UNIT,PRODUCT_DESCRIBE,LIST_PRICE,REGISTER
+		from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<otherwise>PRODUCT_ID</otherwise>
+			</choose>
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			CHECK_TAG='S001-1' and TYPE='Y001-1'
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="selectAllFromApply" resultMap="dfileResult">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,r.* from D_FILE r
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+	<select id="findPagerTotal" resultType="long">
+		select count(PRODUCT_ID) from D_FILE
+		<include refid="WhereCase" />
+	</select>
+</mapper>

@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.HZJSPayMapper">
+
+	<resultMap type="com.softfactory.pojo.SPay" id="spay-result">
+		<id property="id" column="ID" />
+		<result property="payId" column="PAY_ID" />
+		<result property="storer" column="STORER" />
+		<result property="reason" column="REASON" />
+		<result property="reasonexact" column="REASONEXACT" />
+		<result property="amountSum" column="AMOUNT_SUM" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="paidAmountSum" column="PAID_AMOUNT_SUM" />
+		<result property="remark" column="REMARK" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME"
+			javaType="java.util.Date" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" javaType="java.util.Date" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="attmper" column="ATTEMPER" />
+		<result property="attemperTime" column="ATTEMPER_TIME"
+			javaType="java.util.Date" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="storeTag" column="STORE_TAG" />
+		<result property="demandAmountb" column="DEMAND_AMOUNTB" />
+		<result property="realAmoutb" column="REAL_AMOUNTB" />
+		<result property="nowAmountb" column="NOW_AMOUNTB" />
+		<result property="demandAmountAllb" column="DEMAND_AMOUNT_ALLB" />
+		<result property="realAmountAllb" column="REAL_AMOUNT_ALLB" />
+		<result property="demandSalAllb" column="DEMAND_SAL_ALLB" />
+		<result property="realSalAllb" column="REAL_SAL_ALLB" />
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select
+		ID,PAY_ID,STORER,REASON,REASONEXACT,AMOUNT_SUM,COST_PRICE_SUM,PAID_AMOUNT_SUM,REMARK,REGISTER,REGISTER_TIME,CHECKER,CHECK_TIME,CHECK_TAG,ATTEMPER,ATTEMPER_TIME,PRODUCT_ID,STORE_TAG,DEMAND_AMOUNTB,REAL_AMOUNTB,NOW_AMOUNTB,DEMAND_AMOUNT_ALLB,REAL_AMOUNT_ALLB,DEMAND_SAL_ALLB,REAL_SAL_ALLB
+		from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'payId'">PAY_ID</when>
+				<when test="sort == 'storer'">STORER</when>
+				<when test="sort == 'reason'">REASON</when>
+				<when test="sort == 'reasonexact'">REASONEXACT</when>
+				<when test="sort == 'amountSum'">AMOUNT_SUM</when>
+				<when test="sort == 'costPriceSum'">COST_PRICE_SUM</when>
+				<when test="sort == 'paidAmountSum'">PAID_AMOUNT_SUM</when>
+				<when test="sort == 'remark'">REMARK</when>
+				<when test="sort == 'register'">REGISTER</when>
+				<when test="sort == 'registerTime'">REGISTER_TIME</when>
+				<when test="sort == 'checker'">CHECKER</when>
+				<when test="sort == 'checkTime'">CHECK_TIME</when>
+				<when test="sort == 'checkTag'">CHECK_TAG</when>
+				<when test="sort == 'attmper'">ATTEMPER</when>
+				<when test="sort == 'attemperTime'">ATTEMPER_TIME</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'storeTag'">STORE_TAG</when>
+				<when test="sort == 'demandAmountb'">DEMAND_AMOUNTB</when>
+				<when test="sort == 'realAmoutb'">REAL_AMOUNTB</when>
+				<when test="sort == 'nowAmountb'">NOW_AMOUNTB</when>
+				<when test="sort == 'demandAmountAllb'">DEMAND_AMOUNT_ALLB</when>
+				<when test="sort == 'realAmountAllb'">REAL_AMOUNT_ALLB</when>
+				<when test="sort == 'demandSalAllb'">DEMAND_SAL_ALLB</when>
+				<when test="sort == 'realSalAllb'">REAL_SAL_ALLB</when>
+				<otherwise>PAY_ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			CHECK_TAG='S001-0'
+			<if test="payId != null and payId != ''">
+				and PAY_ID LIKE #{payId}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="WhereCase2">
+		<where>
+			1=1
+			<if test="payId != null and payId != ''">
+				and PAY_ID LIKE #{payId}
+			</if>
+		</where>
+	</sql>
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="spay-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from S_PAY e
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(PAY_ID) from S_PAY
+		<include refid="WhereCase" />
+	</select>
+
+
+	<select id="findPager2" resultMap="spay-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from S_PAY e
+		<include refid="WhereCase2" />
+		<include refid="pageSQLFoot" />
+	</select>
+	
+	<select id="findPagerTotal2" resultType="long">
+		select count(PAY_ID) from S_PAY
+		<include refid="WhereCase2" />
+	</select>
+</mapper>

@@ -1,0 +1,367 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 物料组成 -->
+<mapper namespace="com.softfactory.core.dao.XinYouDmoduleMapper">
+
+	<resultMap type="com.softfactory.pojo.Dmodule" id="xinYouDmodule-result">
+		<id property="id" column="ID" />
+		<result property="designId" column="DESIGN_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="firstKindId" column="FIRST_KIND_ID" />
+		<result property="firstKindName" column="FIRST_KIND_NAME" />
+		<result property="secondKindId" column="SECOND_KIND_ID" />
+		<result property="secondKindName" column="SECOND_KIND_NAME" />
+		<result property="thirdKindId" column="THIRD_KIND_ID" />
+		<result property="thirdKindName" column="THIRD_KIND_NAME" />
+		<result property="designer" column="DESIGNER" />
+		<result property="moduleDescribe" column="MODULE_DESCRIBE" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="changer" column="CHANGER" />
+		<result property="changeTime" column="CHANGE_TIME" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="changeTag" column="CHANGE_TAG" />
+	</resultMap>
+	<!-- 根据id查询 -->
+	<select id="findById" resultMap="xinYouDmodule-result">
+		SELECT
+		ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,
+		FIRST_KIND_ID,FIRST_KIND_NAME,SECOND_KIND_ID,SECOND_KIND_NAME,
+		THIRD_KIND_ID,THIRD_KIND_NAME,DESIGNER,MODULE_DESCRIBE,
+		COST_PRICE_SUM,REGISTER,REGISTER_TIME,CHECKER,CHECK_TIME,
+		CHANGER,CHANGE_TIME,CHECK_TAG,CHANGE_TAG
+		FROM D_MODULE WHERE ID=#{id}
+	</select>
+
+	<select id="findByproductId" resultType="com.softfactory.pojo.Dmodule">
+		SELECT
+		ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,
+		FIRST_KIND_ID,FIRST_KIND_NAME,SECOND_KIND_ID,SECOND_KIND_NAME,
+		THIRD_KIND_ID,THIRD_KIND_NAME,DESIGNER,MODULE_DESCRIBE,
+		COST_PRICE_SUM,REGISTER,REGISTER_TIME,CHECKER,CHECK_TIME,
+		CHANGER,CHANGE_TIME,CHECK_TAG,CHANGE_TAG
+		FROM D_MODULE WHERE
+		PRODUCT_ID=#{productId}
+	</select>
+
+	<!--分页查询 -->
+	<sql id="pageSQLHead">
+		select
+		ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,DESIGNER,REGISTER_TIME,COST_PRICE_SUM
+		from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'designId'">IDDESIGN_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'checkTag'">CHECK_TAG</when>
+				<when test="sort == 'changeTag'">CHANGE_TAG</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			1=1 and check_tag='S001-0'
+			<if test="id != null and id != ''">
+				and ID LIKE #{id}
+			</if>
+			<if test="designId != null and designId != ''">
+				and IDDESIGN_ID LIKE #{designId}
+			</if>
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="firstKindName != null and firstKindName != ''">
+				and FRIST_KIND_NAME LIKE #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME LIKE #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME LIKE #{thirdKindName}
+			</if>
+			<if test="designer != null and designer != ''">
+				and DESIGNER LIKE #{designer}
+			</if>
+			<if test="register != null and register != ''">
+				and REGISTER LIKE #{register}
+			</if>
+
+			<if test="registerTime != null and registerTime != ''">
+				and REGISTER_TIME = #{registerTime}
+			</if>
+			<if test="checker != null and checker != ''">
+				and CHECKER LIKE #{checker}
+			</if>
+			<if test="changer != null and changer != ''">
+				and CHANGER LIKE #{changer}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+				and CHECK_TAG LIKE #{checkTag}
+			</if>
+			<if test="changeTag != null and changeTag != ''">
+				and CHANGE_TAG LIKE #{changeTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="xinYouDmodule-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from D_MODULE e
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from D_MODULE
+		<include refid="WhereCase" />
+	</select>
+
+	<!-- 添加 -->
+	<insert id="add" parameterType="com.softfactory.pojo.Dmodule">
+		<selectKey keyProperty="id" order="BEFORE" resultType="int">
+			select SEQ_SYS_USERS.nextval from dual
+		</selectKey>
+		INSERT INTO D_MODULE(ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,
+		FIRST_KIND_ID,FIRST_KIND_NAME,SECOND_KIND_ID,SECOND_KIND_NAME,
+		THIRD_KIND_ID,THIRD_KIND_NAME,DESIGNER,MODULE_DESCRIBE,
+		COST_PRICE_SUM,REGISTER,REGISTER_TIME,CHECK_TAG,CHANGE_TAG)
+		VALUES(#{id},#{designId},#{productId},#{productName},
+		#{firstKindId},#{firstKindName},#{secondKindId},#{secondKindName},
+		#{thirdKindId},#{thirdKindName},#{designer},#{moduleDescribe},
+		#{costPriceSum},#{register},#{registerTime},#{checkTag},#{changeTag})
+	</insert>
+
+	<!-- 流水号 -->
+	<select id="FindBy" resultType="String">
+		select max(DEsign_ID) from
+		D_MODULE
+	</select>
+
+
+
+
+
+	<!--物料组成设计单查询 -->
+	<sql id="pageSQLHead2">
+		select ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,CHECK_TAG from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy2">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'designId'">IDDESIGN_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'checkTag'">CHECK_TAG</when>
+				<when test="sort == 'changeTag'">CHANGE_TAG</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase2">
+		<where>
+			1=1
+			<if test="id != null and id != ''">
+				and ID LIKE #{id}
+			</if>
+			<if test="designId != null and designId != ''">
+				and IDDESIGN_ID LIKE #{designId}
+			</if>
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="firstKindName != null and firstKindName != ''">
+				and FRIST_KIND_NAME LIKE #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME LIKE #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME LIKE #{thirdKindName}
+			</if>
+			<if test="designer != null and designer != ''">
+				and DESIGNER LIKE #{designer}
+			</if>
+			<if test="register != null and register != ''">
+				and REGISTER LIKE #{register}
+			</if>
+
+			<if test="registerTime != null and registerTime != ''">
+				and REGISTER_TIME = #{registerTime}
+			</if>
+			<if test="checker != null and checker != ''">
+				and CHECKER LIKE #{checker}
+			</if>
+			<if test="changer != null and changer != ''">
+				and CHANGER LIKE #{changer}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+				and CHECK_TAG LIKE #{checkTag}
+			</if>
+			<if test="changeTag != null and changeTag != ''">
+				and CHANGE_TAG LIKE #{changeTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot2">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager2" resultMap="xinYouDmodule-result">
+		<include refid="pageSQLHead2" />
+		<include refid="orderBy2" />
+		) rn,e.* from D_MODULE e
+		<include refid="WhereCase2" />
+		<include refid="pageSQLFoot2" />
+	</select>
+	<select id="findPagerTotal2" resultType="long">
+		select count(id) from D_MODULE
+		<include refid="WhereCase2" />
+	</select>
+
+
+
+
+
+
+	<!--物料组成设计单变更 -->
+	<sql id="pageSQLHead3">
+		select
+		ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,DESIGNER,REGISTER_TIME,COST_PRICE_SUM
+		from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy3">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'designId'">IDDESIGN_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'checkTag'">CHECK_TAG</when>
+				<when test="sort == 'changeTag'">CHANGE_TAG</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+	<sql id="WhereCase3">
+		<where>
+			CHECK_TAG='S001-2'
+			<if test="id != null and id != ''">
+				and ID LIKE #{id}
+			</if>
+			<if test="designId != null and designId != ''">
+				and IDDESIGN_ID LIKE #{designId}
+			</if>
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="firstKindName != null and firstKindName != ''">
+				and FRIST_KIND_NAME LIKE #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME LIKE #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME LIKE #{thirdKindName}
+			</if>
+			<if test="designer != null and designer != ''">
+				and DESIGNER LIKE #{designer}
+			</if>
+			<if test="register != null and register != ''">
+				and REGISTER LIKE #{register}
+			</if>
+
+			<if test="registerTime != null and registerTime != ''">
+				and REGISTER_TIME = #{registerTime}
+			</if>
+			<if test="checker != null and checker != ''">
+				and CHECKER LIKE #{checker}
+			</if>
+			<if test="changer != null and changer != ''">
+				and CHANGER LIKE #{changer}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+				and CHECK_TAG LIKE #{checkTag}
+			</if>
+			<if test="changeTag != null and changeTag != ''">
+				and CHANGE_TAG LIKE #{changeTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot3">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager3" resultMap="xinYouDmodule-result">
+		<include refid="pageSQLHead3" />
+		<include refid="orderBy3" />
+		) rn,e.* from D_MODULE e
+		<include refid="WhereCase3" />
+		<include refid="pageSQLFoot3" />
+	</select>
+	<select id="findPagerTotal3" resultType="long">
+		select count(id) from D_MODULE
+		<include refid="WhereCase2" />
+	</select>
+	<select id="FindByInsert" resultMap="xinYouDmodule-result">
+		select
+		ID,PRODUCT_ID,PRODUCT_NAME,
+		FIRST_KIND_ID,FIRST_KIND_NAME,SECOND_KIND_ID,SECOND_KIND_NAME,
+		THIRD_KIND_ID,THIRD_KIND_NAME,REGISTER,REGISTER_TIME from D_FILE where
+		product_ID=#{productId}
+	</select>
+	<select id="FindByInsert1" resultType="int">
+		select ID from D_MODULE t
+		where t.product_id
+		=#{productId}
+	</select>
+
+
+
+
+
+</mapper>

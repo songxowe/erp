@@ -1,0 +1,166 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.LbQueryMapper">
+
+	<resultMap type="com.softfactory.pojo.Manufacture" id="manu-result">
+		<id property="id" column="ID" />
+		<result property="manufactureId" column="MANUFACTURE_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="amount" column="AMOUNT" />
+		<result property="testedAmount" column="TESTED_AMOUNT" />
+		<result property="applyIdGroup" column="APPLY_ID_GROUP" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="moduleCostPriceSum" column="MODULE_COST_PRICE_SUM" />
+		<result property="realModuleCostPriceSum" column="REAL_MODULE_COST_PRICE_SUM" />
+		<result property="labourCostPriceSum" column="LABOUR_COST_PRICE_SUM" />
+		<result property="realLabourCostPriceSum" column="REAL_LABOUR_COST_PRICE_SUM" />
+		<result property="designer" column="DESIGNER" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="remark" column="REMARK" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="manufactureProcedureTag" column="MANUFACTURE_PROCEDURE_TAG" />
+	</resultMap>
+
+	<resultMap type="com.softfactory.pojo.Mprocedure" id="mpro-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="procedureId" column="PROCEDURE_ID" />
+		<result property="procedureName" column="PROCEDURE_NAME" />
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT" />
+		<result property="realLabourHourAmount" column="REAL_LABOUR_HOUR_AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="realSubtotal" column="REAL_SUBTOTAL" />
+		<result property="moduleSubtotal" column="MODULE_SUBTOTAL" />
+		<result property="realModuleSubtotal" column="REAL_MODULE_SUBTOTAL" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="demandAmount" column="DEMAND_AMOUNT" />
+		<result property="realAmount" column="REAL_AMOUNT" />
+		<result property="procedureFinishTag" column="PROCEDURE_FINISH_TAG" />
+		<result property="procedureTransferTag" column="PROCEDURE_TRANSFER_TAG" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.MpModule" id="mpmo-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="renewAmount" column="RENEW_AMOUNT" />
+		<result property="realAmount" column="REAL_AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="realSubtotal" column="REAL_SUBTOTAL" />
+	</resultMap>
+
+	<select id="findByParent" resultMap="mpmo-result">
+		select * from
+		M_PROCEDURE_MODULE where PARENT_ID=#{id}
+	</select>
+
+	<select id="findByParentId" resultMap="mpro-result">
+		select * from M_PROCEDURE
+		where PARENT_ID=#{parentId}
+	</select>
+
+	<select id="findMprocedure" resultMap="mpro-result">
+		select * from M_PROCEDURE
+		where ID=#{id}
+	</select>
+	
+	<resultMap type="com.softfactory.pojo.QueryResult" id="data-result">
+		<id property="id" column="ID" />
+		<result property="manufactureId" column="MANUFACTURE_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="amount" column="AMOUNT" />
+		<result property="testedAmount" column="TESTED_AMOUNT" />
+		<result property="procedureFinishTag" column="PROCEDURE_FINISH_TAG" />
+		<result property="manufactureProcedureTag" column="MANUFACTURE_PROCEDURE_TAG" />
+	</resultMap>
+	
+
+	<sql id="pageSQLHead">
+		select
+		MANUFACTURE_ID,PRODUCT_ID,PRODUCT_NAME,AMOUNT,TESTED_AMOUNT,PROCEDURE_FINISH_TAG,MANUFACTURE_PROCEDURE_TAG
+		from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'manufactureId'">m.MANUFACTURE_ID</when>
+				<when test="sort == 'productId'">m.PRODUCT_ID</when>
+				<when test="sort == 'productName'">m.PRODUCT_NAME</when>
+				<otherwise>m.MANUFACTURE_ID</otherwise>
+			</choose>
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereClase">
+		<where>
+			m.ID=p.PARENT_ID
+			<if test="null!=keyword and ''!=keyword">
+				and (m.MANUFACTURE_ID like #{keyword} or m.PRODUCT_ID like #{keyword} or m.PRODUCT_NAME like #{keyword})
+			</if>
+			<if test="null!=manufactureId and ''!=manufactureId">
+				and m.MANUFACTURE_ID like #{manufacturId}
+			</if>
+			<if test="null!=detailsNumber and ''!=detailsNumber">
+				and p.DETAILS_NUMBER like #{detailsNumber}
+			</if>
+			<if test="null!=checkTag and ''!=checkTag">
+				and m.CHECK_TAG like #{checkTag}
+			</if>
+			<if test="null!=status and ''!=status">
+				and p.PROCEDURE_FINISH_TAG = #{status}
+			</if>
+			<if
+				test="null!=beginTime and null!=endTime">
+				and m.REGISTER_TIME between #{beginTime} and #{endTime}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="data-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,m.MANUFACTURE_ID, m.PRODUCT_ID,
+		m.PRODUCT_NAME, m.AMOUNT,
+		m.TESTED_AMOUNT, m.REGISTER_TIME, p.PROCEDURE_FINISH_TAG,p.DETAILS_NUMBER,m.CHECK_TAG,m.MANUFACTURE_PROCEDURE_TAG from M_MANUFACTURE
+		m,M_PROCEDURE p
+		<include refid="WhereClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(m.ID) from M_MANUFACTURE m,M_PROCEDURE p
+		<include refid="WhereClase" />
+	</select>
+
+	<select id="findByMid" resultMap="manu-result">
+		select * from M_MANUFACTURE
+		where MANUFACTURE_ID=#{manufactureId}
+	</select>
+
+	<select id="findById" resultMap="manu-result">
+		select * from M_MANUFACTURE
+		where ID=#{id}
+	</select>
+</mapper>

@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 物料组成明细 -->
+<mapper namespace="com.softfactory.core.dao.XinYouDmDetailsMapper">
+
+	<resultMap type="com.softfactory.pojo.DmDetails" id="xinYouDmDetails-result">
+
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="type" column="TYPE" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="amount" column="AMOUNT" />
+		<result property="residualAmount" column="RESIDUAL_AMOUNT" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+	</resultMap>
+	<!-- 根据产品序号查询 -->
+	<select id="findById" resultMap="xinYouDmDetails-result">
+		SELECT
+		ID,PARENT_ID,DETAILS_NUMBER,PRODUCT_ID,PRODUCT_NAME,
+		TYPE,PRODUCT_DESCRIBE,AMOUNT_UNIT,AMOUNT,RESIDUAL_AMOUNT,
+		COST_PRICE,SUBTOTAL FROM D_MODULE_DETAILS WHERE PARENT_ID=#{parentId}
+	</select>
+
+	<!--分页查询 -->
+	<sql id="pageSQLHead">
+		select * from
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			1=1
+			<if test="id != null and id != ''">
+				and ID LIKE #{id}
+			</if>
+			<if test="parentId != null and parentId != ''">
+				and PARENT_ID LIKE #{parentId}
+			</if>
+			<if test="detailsNumber != null and detailsNumber != ''">
+				and DETAILS_NUMBER LIKE #{detailsNumber}
+			</if>
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>
+			<if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="xinYouDmDetails-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from D_MODULE_DETAILS e
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from D_MODULE_DETAILS
+		<include refid="WhereCase" />
+	</select>
+	<select id="SelectInsert" resultMap="xinYouDmDetails-result">
+		select
+    PRODUCT_ID,PRODUCT_NAME,
+    TYPE,PRODUCT_DESCRIBE,cost_price,personal_unit amountUnit
+    from D_FILE t where
+    product_ID=#{productId}
+	</select>
+	<!-- 添加 -->
+	<insert id="add" parameterType="com.softfactory.pojo.DmDetails">
+		<selectKey keyProperty="id" order="BEFORE" resultType="int">
+			select SEQ_SYS_USERS.nextval from dual
+		</selectKey>
+		INSERT INTO
+		D_MODULE_DETAILS(ID,PARENT_ID,DETAILS_NUMBER,PRODUCT_ID,PRODUCT_NAME,
+		TYPE,PRODUCT_DESCRIBE,AMOUNT_UNIT,AMOUNT,RESIDUAL_AMOUNT,COST_PRICE,SUBTOTAL)
+		values(#{id},#{parentId},#{detailsNumber},#{productId},#{productName},#{type},
+		#{productDescribe},#{amountUnit,jdbcType=VARCHAR},#{amount},#{residualAmount},#{costPrice},#{subtotal})
+	</insert>
+
+</mapper>

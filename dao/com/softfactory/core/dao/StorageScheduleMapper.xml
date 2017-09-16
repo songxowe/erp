@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.StorageScheduleMapper">
+	<resultMap type="com.softfactory.pojo.StorageSchedule" id="storageSchedule-result">
+		<id property="id" column="ID" />
+		<result property="payId" column="PAY_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productPrice" column="COST_PRICE" />
+		<result property="demandAmountb" column="DEMAND_BAMOUNT" />
+		<result property="demandAmountAllb" column="DEMAND_AMOUNT_ALLB" />
+		<result property="realAmoutb" column="REAL_AMOUNTB" />
+		<result property="nowAmountb" column="NOW_AMOUNTB" />
+		<result property="reason" column="REASON" />
+		<result property="reasonexact" column="REASONEXACT" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="amountSum" column="AMOUNT_SUM" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="storeName" column="STORE_NAME" />
+		<result property="locId" column="LOC_ID" />
+		<result property="locName" column="LOC_NAME" />
+		<result property="splName" column="SPL_NAME" />
+		<result property="currentAmount" column="CURRENTAMOUNT" />
+		<result property="attemperTime" column="ATTEMPER_TIME" />
+		<result property="register" column="REGISTER"/>
+		<result property="payTag" column="PAY_TAG"/>
+		<result property="storeTag" column="STORE_TAG"/>
+	</resultMap>
+
+
+<!-- 第一页面 Select SG.PAY_ID,SG.REASON,SG.REASONEXACT,SG.REGISTER_TIME,SG.AMOUNT_SUM,SG.COST_PRICE_SUM from S_GATHER where SG.CHECK_TAG=’S001-1’ -->
+	<sql id="pageSQLHead">
+		select * from
+		(select row_number() over(
+	</sql>
+
+	<!-- 排序 -->
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">S.ID</when>
+				<when test="sort == 'reason'">S.REASON</when>
+				<when test="sort == 'reasonexact'">S.REASONEXACT</when>
+				<when test="sort == 'registerTime'">S.REGISTER_TIME</when>
+				<when test="sort == 'amountSum'">S.AMOUNT_SUM</when>
+				<when test="sort == 'costPriceSum'">S.COST_PRICE_SUM</when>
+				<otherwise>S.ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+<!-- 条件如有不同请修改where里的条件 -->
+	<sql id="WhereClase">
+		<where>
+			S.CHECK_TAG='S001-1' and S.STORE_TAG='K002-0' 
+		</where>
+		
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn >#{pageno}  and rn <=#{pagesize}  ]]>
+	</sql>
+	
+	<!-- 第一页面 -->
+	<select id="findPager" resultMap="storageSchedule-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,S.ID id,S.PAY_ID payId,S.REASON reason,S.REASONEXACT reasonexact,S.REGISTER_TIME registerTime,S.AMOUNT_SUM amountSum,S.COST_PRICE_SUM costPriceSum from S_PAY S
+	    <include refid="WhereClase" /> 
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<!-- 查询第一页面总记录数 -->
+	<!-- 查询总记录数 -->
+	<select id="findPagerTotal" resultType="long">
+		select count(S.ID) from S_PAY S,S_CELL SC
+		<include refid="WhereClase" />
+	</select>
+
+
+ 	<!-- 第二页面 -->  
+	<select id="findById"  resultMap="storageSchedule-result">
+	Select SP.ID,SP.PAY_ID,SP.REASON,SP.REASONEXACT,SP.DEMAND_AMOUNT_ALLB demandAmountAllb,
+	SP.COST_PRICE_SUM costPriceSum,SP.REAL_AMOUNTB realAmoutb,SP.DEMAND_AMOUNTB demandAmountb,
+	SP.REGISTER_TIME registerTime,SPD.PRODUCT_NAME productName,SPD.PRODUCT_ID productId,
+	S.STORE_NAME storeName,S.LOC_ID locId,S.LOC_NAME locName,S.SPL_NAME splName,
+	(S.MAX_CAPACITY_AMOUNT-S.AMOUNT) CURRENTAMOUNT from S_PAY_DETAILS SPD inner join 
+	S_CELL S on S.PRODUCT_ID=SPD.PRODUCT_ID  and SPD.PAY_TAG='K002-0' inner join S_PAY SP on SP.ID=#{id}
+	</select>
+	<!-- 第二。1页面 -->
+	<select id="findDetail" parameterType="int" resultMap="storageSchedule-result">
+	select * from S_PAY where ID=#{id}
+	</select>
+	<!-- 第三页面 -->
+	<select id="findBypId" resultMap="storageSchedule-result" >
+	select SP.ID id,SPD.PRODUCT_ID productId,SPD.PRODUCT_NAME productName,SPD.COST_PRICE productPrice,SP.REGISTER register,
+SP.REGISTER_TIME registerTime,SP.DEMAND_AMOUNTB demandAmountb,SP.REAL_AMOUNTB realAmoutb,S.STORE_NAME storeName,S.LOC_ID locId,
+S.LOC_NAME locName,S.SPL_NAME splName,(S.MAX_CAPACITY_AMOUNT-S.AMOUNT) currentAmount from S_PAY_DETAILS SPD,S_PAY SP , S_CELL S where SP.ID=SPD.parent_id and SPD.PRODUCT_ID=S.PRODUCT_ID and SPD.PRODUCT_ID=#{productId}
+	</select>
+	<update id="modify" parameterType="String" >
+		Update S_PAY_DETAILS SPD set SPD.PAY_TAG='K002-1' where SPD.PRODUCT_ID=#{pId}
+	</update>
+	
+	<resultMap type="com.softfactory.pojo.Scell" id="scell-result">
+		<id property="id" column="ID" jdbcType="NUMERIC" />
+		<result property="storeId" column="STORE_ID" jdbcType="VARCHAR" />
+		<result property="storeName" column="STORE_NAME" jdbcType="VARCHAR" />
+		<result property="productId" column="PRODUCT_ID" jdbcType="VARCHAR" />
+		<result property="productName" column="PRODUCT_NAME" jdbcType="VARCHAR" />
+		<result property="firstKingId" column="FIRST_KIND_ID" jdbcType="VARCHAR" />
+		<result property="firstKingName" column="FIRST_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="secondKingId" column="SECOND_KIND_ID"
+			jdbcType="VARCHAR" />
+		<result property="secondKingName" column="SECOND_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="thirdKingId" column="THIRD_KIND_ID" jdbcType="VARCHAR" />
+		<result property="thirdKingName" column="THIRD_KIND_NAME"
+			jdbcType="VARCHAR" />
+		<result property="minAmount" column="MIN_AMOUNT" jdbcType="BIGINT" />
+		<result property="maxAmount" column="MAX_AMOUNT" jdbcType="BIGINT" />
+		<result property="maxCapacityAmount" column="MAX_CAPACITY_AMOUNT"
+			jdbcType="BIGINT" />
+		<result property="locId" column="LOC_ID" jdbcType="VARCHAR" />
+		<result property="locName" column="LOC_NAME" jdbcType="VARCHAR" />
+		<result property="splName" column="SPL_NAME" jdbcType="VARCHAR" />
+		<result property="storageUnit" column="STORAGE_UNIT" jdbcType="VARCHAR" />
+		<result property="amount" column="AMOUNT" jdbcType="BIGINT" />
+		<result property="config" column="CONFIG" jdbcType="VARCHAR" />
+		<result property="designer" column="DESIGNER" jdbcType="VARCHAR" />
+		<result property="register" column="REGISTER" jdbcType="VARCHAR" />
+		<result property="registerTime" column="REGISTER_TIME"
+			jdbcType="DATE" />
+		<result property="checker" column="CHECKER" jdbcType="VARCHAR" />
+		<result property="checkTime" column="CHECK_TIME" jdbcType="DATE" />
+		<result property="checkTag" column="CHECK_TAG" jdbcType="VARCHAR" />
+		<result property="productType" column="TYPE" jdbcType="VARCHAR" />
+		<result property="productClass" column="PRODUCT_CLASS"
+			jdbcType="VARCHAR" />
+	</resultMap>
+	<select id="findScell" resultMap="scell-result">
+		select * from S_CELL where PRODUCT_ID=#{productId}
+	</select>
+	
+</mapper>

@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.StorageScheduleOutMapper">
+
+	<resultMap type="com.softfactory.pojo.StorageScheduleOut" id="storageScheduleOut-result">
+		<id property="id" column="ID" />
+		<result property="gatherId" column="GATHER_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="demandAmounta" column="DEMAND_AAMOUNTA" />
+		<result property="demandAmountAlla" column="DEMAND_AMOUNT_ALLA" />
+		<result property="realAmouta" column="REAL_AMOUNTA" />
+		<result property="nowAmounta" column="NOW_AMOUNTA" />
+		<result property="reason" column="REASON" />
+		<result property="reasonexact" column="REASONEXACT" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="amountSum" column="AMOUNT_SUM" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="storeName" column="STORE_NAME" />
+		<result property="locId" column="LOC_ID" />
+		<result property="locName" column="LOC_NAME" />
+		<result property="splName" column="SPL_NAME" />
+		<result property="currentAmount" column="CURRENTAMOUNT" />
+		<result property="attemperTime" column="ATTEMPER_TIME" />
+		<result property="demandSalAlla" column="DEMAND_SAL_ALLA" />
+		<result property="realAmountAlla" column="REAL_SAL_ALLA" />
+	</resultMap>
+
+
+<!-- 第一页面 Select SG.PAY_ID,SG.REASON,SG.REASONEXACT,SG.REGISTER_TIME,SG.AMOUNT_SUM,SG.COST_PRICE_SUM from S_GATHER where SG.CHECK_TAG=’S001-1’ -->
+	<sql id="pageSQLHead">
+		select * from
+		(select row_number() over(
+	</sql>
+
+	<!-- 排序 -->
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">SG.ID</when>
+				<when test="sort == 'reason'">SG.REASON</when>
+				<when test="sort == 'reasonexact'">SG.REASONEXACT</when>
+				<when test="sort == 'registerTime'">SG.REGISTER_TIME</when>
+				<when test="sort == 'amountSum'">SG.AMOUNT_SUM</when>
+				<when test="sort == 'costPriceSum'">SG.COST_PRICE_SUM</when>
+				<otherwise>SG.ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereClase">
+		<where>
+			SG.PRODUCT_ID==SC.PRODUCT_ID and SG.STORE_TAG!='K002-2' and SC.CHECK_TAG='2' SG.CHECK_TAG=’S001-1’
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn >#{pageno}  and rn <=#{pagesize}  ]]>
+	</sql>
+	
+	<!-- 第一页面 -->
+	<select id="findPager" resultMap="storageScheduleOut-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,SG.GATHER_ID gatherId,SG.REASON reason,SG.REASONEXACT reasonexact,SG.REGISTER_TIME registerTime,SG.AMOUNT_SUM amountSum,SG.COST_PRICE_SUM costPriceSum from S_GATHER SG,S_CELL SC
+	    <include refid="WhereClase" /> 
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<!-- 查询第一页面总记录数 -->
+	<!-- 查询总记录数 -->
+	<select id="findPagerTotal" resultType="long">
+		select count(SG.ID) from S_GATHER SG
+		<include refid="WhereClase" />
+	</select>
+
+
+ 	<!-- 第二页面 -->  
+	<select id="findById" parameterType="int" resultMap="storageScheduleOut-result">
+	Select SG.GATHER_ID payId,SG.REASON reason,SG.REASONEXACT reasonexact,SG.DEMAND_AMOUNT_ALLA demandAmountAllb,
+	SG.DEMAND_AMOUNTA demandAmounta,SG.REAL_AMOUNA realAmouta,
+	SG.REGISTER register,SG.REGISTER_TIME registerTime,SGD.PRODUCT_NAME productName,SGD.PRODUCT_ID productId,SC.STORE_NAME storeName,
+	SC.LOC_ID locId,SC.LOC_NAME locName,SC.SPL_NAME splName,(SC.MAX_CAPACITY_AMOUNT-SC.AMOUNT) CURRENTAMOUNT 
+	from S_GATHER_DETAILS SGD inner join S_GATHER SG on SG.ID={id} inner join S_CELL SC on SC.PRODUCT_ID=SGD.PRODUCT_ID;
+	</select>
+	<!-- 第二。1页面 -->
+	<select id="findDetail" parameterType="int" resultMap="storageScheduleOut-result">
+	select ID id,REASON reason,REASONEXACT reasonexact,DEMAND_AMOUNT_ALLA demandAmountAlla,DEMAND_SAL_ALLA demandSalAlla,REAL_AMOUNT_ALLA realAmountAlla,DEMAND_AMOUNTA demandAmounta,REAL_AMOUNTA realAmoutafrom S_PAY where ID=#{id}
+	</select>
+	<!-- 第三页面 -->
+	<select id="findBypId" resultMap="storageScheduleOut-result" >
+	select SG.ID id,SGD.PRODUCT_ID productId,SGD.PRODUCT_NAME productName,SGD.COST_PRICE costPrice,SD.REGISTER register,
+SG.REGISTER_TIME registerTime,SG.DEMAND_AMOUNTA demandAmounta,SG.REAL_AMOUNTA realAmouta,S.STORE_NAME storeName,S.LOC_ID locId,
+S.LOC_NAME locName,S.SPL_NAME splName,(S.MAX_CAPACITY_AMOUNT-S.AMOUNT) currentAmount from S_GATHER_DETAILS SGD,S_GATHER SG , S_CELL S where SG.ID=SGD.parent_id and SGD.PRODUCT_ID=S.PRODUCT_ID and SGD.PRODUCT_ID=#{productId}
+	</select>
+	
+	<!-- 第三页面 -->
+	<update id="modify" parameterType="int" >
+		Update S_GATHER_DETAILS SGD set SGD.GATHER_TAG='K002-2' where SGD.PRODUCT_ID={pId}
+	</update>
+
+</mapper>

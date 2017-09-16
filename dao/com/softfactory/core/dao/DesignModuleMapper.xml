@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.softfactory.core.dao.DesignModuleMapper">
+	<resultMap type="com.softfactory.pojo.DesignModule"  id="designModule-Map">
+		<id property="id" column="ID" />
+		<result property="designId" column="DESIGN_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="firstKindId" column="FIRST_KIND_ID" />
+		<result property="firstKindName" column="FIRST_KIND_NAME" />
+		<result property="secondKindId" column="SECOND_KIND_ID" />
+		<result property="secondKindName" column="SECOND_KIND_NAME" />
+		<result property="thirdKindId" column="THIRD_KIND_ID" />
+		<result property="thirdKindName" column="THIRD_KIND_NAME" />
+		<result property="residualAmount" column="RESIDUAL_AMOUNT" />
+		<result property="designer" column="DESIGNER" />
+		<result property="moduleDescribe" column="MODULE_DESCRIBE" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" javaType="java.util.Date" jdbcType="DATE" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkerTime" column="CHECK_TIME" />
+		<result property="changer" column="CHANGER" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="changeTag" column="CHANGE_TAG" />
+	</resultMap>
+	<sql id="pageSQLHead">
+		select ID,PRODUCT_ID,PRODUCT_NAME,FIRST_KIND_NAME,SECOND_KIND_NAME,THIRD_KIND_NAME from 
+		(select row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+			</choose>
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			 1=1 
+			 <if test="productName != null and productName != ''">
+				and PRODUCT_NAME LIKE #{productName}
+			</if>
+			<if test="checkTag != null and checkTag != ''">
+				and CHECK_TAG = #{checkTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+   <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize}  ]]>
+	</sql>
+
+	<select id="findPager" resultMap="designModule-Map">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from D_MODULE e  
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(PRODUCT_NAME) from D_MODULE
+		<include refid="WhereCase" />		
+	</select>
+	
+	<select id="findById" resultMap="designModule-Map" >
+	select * from D_MODULE where ID = #{id,jdbcType=NUMERIC}
+	</select>
+	
+</mapper>

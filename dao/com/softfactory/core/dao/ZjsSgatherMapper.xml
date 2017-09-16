@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+<mapper namespace="com.softfactory.core.dao.ZjsSgatherMapper">
+
+	<resultMap type="com.softfactory.pojo.Sgather" id="sgather-result">
+		<id property="id" column="ID" />
+		<result property="gatherId" column="GATHER_ID"/>
+		<result property="storer" column="STORER"/>
+		<result property="reason" column="REASON" />
+		<result property="reasonexact" column="REASONEXACT" />
+		<result property="amountSum" column="AMOUNT_SUM" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="gatheredAmountSum" column="GATHERED_AMOUNT_SUM" />
+		<result property="remark" column="REMARK" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" javaType="java.util.Date" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" javaType="java.util.Date" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="attemper" column="ATTEMPER" />
+		<result property="attemperTime" column="ATTEMPER_TIME" javaType="java.util.Date" />
+	    <result property="storeTag" column="STORE_TAG"/>
+	    <result property="maId" column="MaId" />
+	    <result property="demandAmounta" column="DEMAND_AMOUNTA" />
+		<result property="realAmounta" column="REAL_AMOUNA" />
+		<result property="nowAmounta" column="NOW_AMOUNTA" />
+		<result property="demandAmountAlla" column="DEMAND_AMOUNT_ALLA " />
+		<result property="realAmountAlla" column="REAL_AMOUNT_ALLA " />
+	    <result property="demandSalAlla" column="DEMAND_SAL_ALLA" />
+	    <result property="realSalAlla" column="REAL_SAL_ALLA" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.SgDetails" id="sgDetails-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="amount" column="AMONUT" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="dispatch" column="DISPATCH" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.Scell" id="scell-result">
+		<id property="id" column="ID" />
+		<result property="stroeId" column="STORE_ID" />
+		<result property="storeName" column="STORE_NAME" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="firstKingId" column="FIRST_KIND_ID" />
+		<result property="firstKingName" column="FIRST_KIND_NAME" />
+		<result property="secondKingId" column="SECOND_KIND_ID" />
+		<result property="secondKingName" column="SECOND_KIND_NAME" />
+		<result property="thirdKingId" column="THIRD_KIND_ID" />
+		<result property="thirdKingName" column="THIRD_KIND_NAME" />
+		<result property="minAmount" column="MIN_AMOUNT"  />
+		<result property="maxAmount" column="MAX_AMOUNT"  />
+		<result property="maxCapacityAmount" column="MAX_CAPACITY_AMOUNT" />
+		<result property="locId" column="LOC_ID" />
+		<result property="locaName" column="LOC_NAME" />
+		<result property="splName" column="SPL_NAME" />
+		<result property="storageUnit" column="STORAGE_UNIT" />
+		<result property="amount" column="AMOUNT" />
+		<result property="config" column="CONFIG" />
+		<result property="designer" column="DESIGNER" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME"
+			javaType="java.util.Date" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" javaType="java.util.Date" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="designCellTag" column="DESIGN_CELL_TAG" />
+		<result property="type" column="TYPE" />
+		<result property="productClass" column="PRODUCT_CLASS" />
+	</resultMap>
+	
+
+	<sql id="pageSQLHead">
+		select ID,GATHER_ID,STORER,REASON,REASONEXACT,AMOUNT_SUM,COST_PRICE_SUM,
+		GATHERED_AMOUNT_SUM,REMARK,REGISTER,REGISTER_TIME,CHECKER,CHECK_TIME,
+		CHECK_TAG,ATTEMPER,ATTEMPER_TIME,STORE_TAG,MaId,DEMAND_AMOUNTA,REAL_AMOUNA,NOW_AMOUNTA,DEMAND_AMOUNT_ALLA,
+		REAL_AMOUNT_ALLA,DEMAND_SAL_ALLA,REAL_SAL_ALLA from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'gatherId'">GATHER_ID</when>
+				<when test="sort == 'storer'">STORER</when>
+				<otherwise>ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase1">
+		<where>
+			1=1  and STORE_TAG = 'K002-2'
+		</where>
+	</sql>
+	
+	<sql id="WhereCase2">
+		<where>
+			1=1  and STORE_TAG = 'K002-1' and CHECK_TAG = 'S001-0'
+		</where>
+	</sql>
+	
+	<sql id="WhereCase3">
+		<where>
+			1=1  and STORE_TAG = 'K002-1'  and CHECK_TAG = 'S001-1'
+		</where>
+	</sql>
+	
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findOnePager" resultMap="sgather-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.* from S_GATHER s
+		<include refid="WhereCase1" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findOnePagerTotal" resultType="long">
+		select count(id) from S_GATHER 
+		<include refid="WhereCase1" />
+	</select>
+	
+	<select id="findTwoPager" resultMap="sgather-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.* from S_GATHER s 
+		<include refid="WhereCase2" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findTwoPagerTotal" resultType="long">
+		select count(id) from S_GATHER 
+		<include refid="WhereCase2" />
+	</select>
+	
+	<select id="findThreePager" resultMap="sgather-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,s.* from S_GATHER s 
+		<include refid="WhereCase3" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findThreePagerTotal" resultType="long">
+		select count(id) from S_GATHER 
+		<include refid="WhereCase3" />
+	</select>
+	
+	<select id="findById" resultMap="sgather-result">
+       select * from S_GATHER where ID = #{gatherId}
+    </select>
+    
+    <select id="findscellById" resultMap="scell-result" parameterType="String">
+		select * from S_CELL  where product_id=#{productId}
+	</select>
+	</mapper>

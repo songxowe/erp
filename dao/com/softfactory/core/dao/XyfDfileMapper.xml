@@ -1,0 +1,247 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.XyfDfileMapper">
+	<resultMap type="com.softfactory.pojo.Dfile" id="dfile-result">
+		<id property="id" column="ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="factoryName" column="FACTORY_NAME" />
+		<result property="firstKindId" column="FIRST_KIND_ID" />
+		<result property="firstKindName" column="FIRST_KIND_NAME" />
+		<result property="secondKindId" column="SECOND_KIND_ID" />
+		<result property="secondKindName" column="SECOND_KIND_NAME" />
+		<result property="thirdKindId" column="THIRD_KIND_ID" />
+		<result property="thirdKindName" column="THIRD_KIND_NAME" />
+		<result property="productNick" column="PRODUCT_NICK" />
+		<result property="type" column="TYPE" />
+		<result property="productClass" column="PRODUCT_CLASS" />
+		<result property="personalUnit" column="PERSONAL_UNIT" />
+		<result property="personalValue" column="PERSONAL_VALUE" />
+		<result property="providerGroup" column="PROVIDER_GROUP" />
+		<result property="listPrice" column="LIST_PRICE" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="realCostPrice" column="REAL_COST_PRICE" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="responsiblePerson" column="RESPONSIBLE_PERSON" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="changer" column="CHANGER" />
+		<result property="changeTime" column="CHANGER_TIME" />
+		<result property="changeTag" column="CHANGE_TAG" />
+		<result property="priceChangeTag" column="PRICE_CHANGE_TAG" />
+		<result property="fileChangeAmount" column="FILE_CHANGE_AMOUNT" />
+		<result property="deleteTag" column="DELETE_TAG" />
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG" />
+		<result property="designProcedureTag" column="DESIGN_PROCEDURE_TAG" />
+		<result property="designCellTag" column="DESIGN_CELL_TAG" />				
+	</resultMap>
+	
+	<resultMap type="com.softfactory.pojo.Dkind" id="dkind-result">
+		<id property="id" column="ID"/>
+		<result property="pid" column="P_ID"/>
+		<result property="kindId" column="KIND_ID"/>
+		<result property="kindName" column="KIND_NAME"/>
+	</resultMap>
+
+	<!-- ID,PRODUCT_ID,PRODUCT_NAME,PRODUCT_CLASS,FIRST_KIND_NAME,SECOND_KIND_NAME,THIRD_KIND_NAME,TYPE  -->
+	<sql id="pageSQLHead">
+		select * from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<otherwise>PRODUCT_ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+	
+	<sql id="WhereCase1">
+		<where>
+			CHECK_TAG = 'S001-1' and DELETE_TAG = 'C001-0'
+			<if test="firstKindName != null and firstKindName != '' and firstKindName!=-1">
+				and FIRST_KIND_ID = #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != '' and secondKindName!=-1">
+				and SECOND_KIND_ID = #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != '' and thirdKindName!=-1">
+				and THIRD_KIND_ID = #{thirdKindName}
+			</if>
+			<if test="type != null and type != ''">
+				and TYPE = #{type}
+			</if>
+			<if test="beginTime != null and endTime != null">
+        		and REGISTER_TIME between #{beginTime} and #{endTime}
+     		</if>
+		</where>
+	</sql>
+	
+	<sql id="WhereCase2">
+		<where>
+			CHECK_TAG in ('S001-0','S001-2')
+			<if test="firstKindName != null and firstKindName != ''">
+				and FIRST_KIND_NAME = #{firstKindName}
+			</if>
+			<if test="secondKindName != null and secondKindName != ''">
+				and SECOND_KIND_NAME = #{secondKindName}
+			</if>
+			<if test="thirdKindName != null and thirdKindName != ''">
+				and THIRD_KIND_NAME = #{thirdKindName}
+			</if>
+			<if test="type != null and type != ''">
+				and TYPE = #{type}
+			</if>
+			<if test="beginTime != null and endTime != null">
+        		and REGISTER_TIME between #{beginTime} and #{endTime}
+     		</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<!-- 分页1 查询产品档案（条件查询） -->
+	<select id="findPager" resultMap="dfile-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,d.* from D_FILE d
+		<include refid="WhereCase1" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from D_FILE
+		<include refid="WhereCase1" />
+	</select>
+	
+	<!-- 分页2 查询未审核的产品档案（条件查询） -->
+	<select id="findUncheckedPager" resultMap="dfile-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,d.* from D_FILE d
+		<include refid="WhereCase2" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findUncheckedPagerTotal" resultType="long">
+		select count(id) from D_FILE
+		<include refid="WhereCase2" />
+	</select>
+	
+	<!-- 分页3 查询可恢复的产品档案 -->
+	<select id="findRecoveryPager" resultMap="dfile-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,d.* from D_FILE d where DELETE_TAG = 'C001-1'
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findRecoveryPagerTotal" resultType="long">
+		select count(id) from D_FILE where DELETE_TAG = 'C001-1'
+	</select>
+		
+	<insert id="add" parameterType="com.softfactory.pojo.Dfile">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select SEQ_SYS_CODES.nextval from dual
+		</selectKey>
+		insert into
+		D_FILE(ID,PRODUCT_ID,PRODUCT_NAME,FACTORY_NAME,FIRST_KIND_ID,FIRST_KIND_NAME,
+		SECOND_KIND_ID,SECOND_KIND_NAME,THIRD_KIND_ID,THIRD_KIND_NAME,PRODUCT_NICK,
+		TYPE,PRODUCT_CLASS,PERSONAL_UNIT,PERSONAL_VALUE,PROVIDER_GROUP,LIST_PRICE,COST_PRICE,
+		AMOUNT_UNIT,PRODUCT_DESCRIBE,RESPONSIBLE_PERSON,REGISTER,REGISTER_TIME,CHECKER,CHECK_TAG,
+		CHANGE_TAG,PRICE_CHANGE_TAG,DELETE_TAG,DESIGN_MODULE_TAG,DESIGN_PROCEDURE_TAG,
+		DESIGN_CELL_TAG) 
+		values(#{id,jdbcType=NUMERIC},#{productId,jdbcType=VARCHAR},#{productName,jdbcType=VARCHAR},
+		#{factoryName,jdbcType=VARCHAR},#{firstKindId,jdbcType=VARCHAR},#{firstKindName,jdbcType=VARCHAR},
+		#{secondKindId,jdbcType=VARCHAR},#{secondKindName,jdbcType=VARCHAR},#{thirdKindId,jdbcType=VARCHAR},
+		#{thirdKindName,jdbcType=VARCHAR},#{productNick,jdbcType=VARCHAR},#{type,jdbcType=VARCHAR},
+		#{productClass,jdbcType=VARCHAR},#{personalUnit,jdbcType=VARCHAR},#{personalValue,jdbcType=VARCHAR},
+		#{providerGroup,jdbcType=VARCHAR},#{listPrice,jdbcType=NUMERIC},#{costPrice,jdbcType=NUMERIC},
+		#{amountUnit,jdbcType=VARCHAR},#{productDescribe,jdbcType=VARCHAR},#{responsiblePerson,jdbcType=VARCHAR},#{register,jdbcType=VARCHAR},
+		#{registerTime,jdbcType=DATE},#{checker,jdbcType=VARCHAR},#{checkTag,jdbcType=VARCHAR},
+		#{changeTag,jdbcType=VARCHAR},#{priceChangeTag,jdbcType=VARCHAR},#{deleteTag,jdbcType=VARCHAR},
+		#{designModuleTag},#{designProcedureTag},#{designCellTag,jdbcType=VARCHAR})
+	</insert>
+	
+	<!--  
+	<update id="modify" parameterType="com.softfactory.pojo.Dfile">
+		update D_FILE set FACTORY_NAME=#{factoryName,jdbcType=VARCHAR},FIRST_KIND_ID=#{firstKindId,jdbcType=VARCHAR},
+		FIRST_KIND_NAME=#{firstKindName,jdbcType=VARCHAR},SECOND_KIND_ID=#{secondKindId,jdbcType=VARCHAR},
+		SECOND_KIND_NAME=#{secondKindName,jdbcType=VARCHAR},THIRD_KIND_ID=#{thirdKindId,jdbcType=VARCHAR},
+		THIRD_KIND_NAME=#{thirdKindName,jdbcType=VARCHAR},PRODUCT_NICK=#{productNick,jdbcType=VARCHAR},
+		TYPE=#{type,jdbcType=VARCHAR},PRODUCT_CLASS=#{productClass,jdbcType=VARCHAR},
+		PERSONAL_UNIT=#{personalUnit,jdbcType=VARCHAR},PERSONAL_VALUE=#{personalValue,jdbcType=VARCHAR},
+		PRODUCT_DESCRIBE=#{productDescribe,jdbcType=VARCHAR},RESPONSIBLE_PERSON=#{responsiblePerson,jdbcType=VARCHAR},
+		CHECK_TAG=#{checkTag,jdbcType=VARCHAR},CHANGE_TAG=#{changeTag,jdbcType=VARCHAR}
+		where ID=#{id,jdbcType=NUMERIC}
+	</update>
+	-->
+	
+	<update id="modify" parameterType="com.softfactory.pojo.Dfile">
+		update D_FILE set PRODUCT_NAME=#{productName,jdbcType=VARCHAR},FACTORY_NAME=#{factoryName,jdbcType=VARCHAR},
+		FIRST_KIND_ID=#{firstKindId,jdbcType=VARCHAR},FIRST_KIND_NAME=#{firstKindName,jdbcType=VARCHAR},
+		SECOND_KIND_ID=#{secondKindId,jdbcType=VARCHAR},SECOND_KIND_NAME=#{secondKindName,jdbcType=VARCHAR},
+		THIRD_KIND_ID=#{thirdKindId,jdbcType=VARCHAR},THIRD_KIND_NAME=#{thirdKindName,jdbcType=VARCHAR},
+		PRODUCT_NICK=#{productNick,jdbcType=VARCHAR},TYPE=#{type,jdbcType=VARCHAR},
+		PRODUCT_CLASS=#{productClass,jdbcType=VARCHAR},PERSONAL_UNIT=#{personalUnit,jdbcType=VARCHAR},
+		PERSONAL_VALUE=#{personalValue,jdbcType=VARCHAR},PROVIDER_GROUP=#{providerGroup,jdbcType=VARCHAR},
+		LIST_PRICE=#{listPrice,jdbcType=NUMERIC},COST_PRICE=#{costPrice,jdbcType=NUMERIC},
+		PRODUCT_DESCRIBE=#{productDescribe,jdbcType=VARCHAR},RESPONSIBLE_PERSON=#{responsiblePerson,jdbcType=VARCHAR},
+		CHECKER=#{checker,jdbcType=VARCHAR},CHECK_TAG=#{checkTag,jdbcType=VARCHAR},
+		CHANGE_TAG=#{changeTag,jdbcType=VARCHAR},DELETE_TAG=#{deleteTag,jdbcType=VARCHAR}
+		where ID=#{id,jdbcType=NUMERIC}
+	</update>
+	
+	<delete id="remove" parameterType="int">
+		delete from D_FILE where ID=#{id,jdbcType=NUMERIC}
+	</delete>
+	 
+	<select id="findById" parameterType="int" resultMap="dfile-result">
+		select * from D_FILE where ID=#{id}
+	</select>
+			
+	<select id="findByCheckTag" parameterType="String" resultMap="dfile-result">
+		select * from D_FILE where CHECK_TAG=#{checkTag}
+	</select>
+	
+	<select id="findAll" resultMap="dkind-result">
+		select * from D_CONFIG_FILE_KIND 
+		<where>
+			<if test="null!=pid">
+				P_ID=#{pid,jdbcType=NUMERIC,javaType=java.lang.Integer}
+			</if>
+			<if test="null==pid">
+				P_ID is null
+			</if>
+		</where>
+	</select>
+    
+    <select id="findDkindById" parameterType="int" resultMap="dkind-result">
+		select * from D_CONFIG_FILE_KIND where ID = #{id}
+	</select>
+	
+	<select id="findfirst" resultMap="dkind-result">
+		select * from D_CONFIG_FILE_KIND where P_ID is null
+	</select>
+	
+	<select id="findByName" resultMap="dkind-result">
+		select * from D_CONFIG_FILE_KIND where KIND_NAME=#{name,jdbcType=VARCHAR}
+	</select>
+</mapper>

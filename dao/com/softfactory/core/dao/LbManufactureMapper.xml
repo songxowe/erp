@@ -1,0 +1,220 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.LbManufactureMapper">
+
+	<resultMap type="com.softfactory.pojo.Manufacture" id="manu-result">
+		<id property="id" column="ID" />
+		<result property="manufactureId" column="MANUFACTURE_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="amount" column="AMOUNT" />
+		<result property="testedAmount" column="TESTED_AMOUNT" />
+		<result property="applyIdGroup" column="APPLY_ID_GROUP" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="moduleCostPriceSum" column="MODULE_COST_PRICE_SUM" />
+		<result property="realModuleCostPriceSum" column="REAL_MODULE_COST_PRICE_SUM" />
+		<result property="labourCostPriceSum" column="LABOUR_COST_PRICE_SUM" />
+		<result property="realLabourCostPriceSum" column="REAL_LABOUR_COST_PRICE_SUM" />
+		<result property="designer" column="DESIGNER" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+		<result property="remark" column="REMARK" />
+		<result property="checkTag" column="CHECK_TAG" />
+		<result property="manufactureProcedureTag" column="MANUFACTURE_PROCEDURE_TAG" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.Mprocedure" id="mpro-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="procedureId" column="PROCEDURE_ID" />
+		<result property="procedureName" column="PROCEDURE_NAME" />
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT" />
+		<result property="realLabourHourAmount" column="REAL_LABOUR_HOUR_AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="realSubtotal" column="REAL_SUBTOTAL" />
+		<result property="moduleSubtotal" column="MODULE_SUBTOTAL" />
+		<result property="realModuleSubtotal" column="REAL_MODULE_SUBTOTAL" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="demandAmount" column="DEMAND_AMOUNT" />
+		<result property="realAmount" column="REAL_AMOUNT" />
+		<result property="procedureFinishTag" column="PROCEDURE_FINISH_TAG" />
+		<result property="procedureTransferTag" column="PROCEDURE_TRANSFER_TAG" />
+	</resultMap>
+	<resultMap type="com.softfactory.pojo.MpModule" id="mpmo-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="renewAmount" column="RENEW_AMOUNT" />
+		<result property="realAmount" column="REAL_AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="realSubtotal" column="REAL_SUBTOTAL" />
+	</resultMap>
+	
+	<resultMap type="com.softfactory.pojo.MdpDetails" id="MdpDetails-result">
+		<id property="id" column="ID"/>
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="detailsNumber" column="DETAILS_NUMBER"/>
+		<result property="procedureId" column="PROCEDURE_ID"/>
+		<result property="procedureName" column="PROCEDURE_NAME"/>
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT"/>
+		<result property="procedureDescribe" column="PROCEDURE_DESCRIBE"/>
+		<result property="amountUnit" column="AMOUNT_UNIT"/>
+		<result property="costPrice" column="COST_PRICE"/>
+		<result property="subtotal" column="SUBTOTAL"/>
+		<result property="moduleSubtotal" column="MODULE_SUBTOTAL"/>
+		<result property="register" column="REGISTER"/>
+		<result property="registerTime" column="REGISTER_TIME"/>
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG"/>
+		<result property="designModuleChangeTag" column="DESIGN_MODULE_CHANGE_TAG"/>
+	</resultMap>
+	<select id="findMdpDetails" resultMap="MdpDetails-result">
+		select * from M_DESIGN_PROCEDURE_DETAILS where PARENT_ID=#{id}
+	</select>
+	
+	<resultMap type="com.softfactory.pojo.MdpModule" id="MdpModule-result">
+		<id property="id" column="ID"/>
+		<result property="parentId" column="PARENT_ID"/>
+		<result property="detailsNumber" column="DETAILS_NUMBER"/>
+		<result property="productId" column="PRODUCT_ID"/>
+		<result property="productName" column="PRODUCT_NAME"/>
+		<result property="type" column="TYPE"/>
+		<result property="TYPE" column="AMOUNT"/>
+		<result property="productDescribe" column="PRODUCT_DESCRIBE"/>
+		<result property="amountUnit" column="AMOUNT_UNIT"/>
+		<result property="costPrice" column="COST_PRICE"/>
+		<result property="subtotal" column="SUBTOTAL"/>		
+	</resultMap>
+	
+	<select id="findMdpModule" resultMap="MdpModule-result">
+		select * from M_DESIGN_PROCEDURE_MODULE where PARENT_ID=#{id} and PROCEDURE_NAME=#{name}
+	</select>
+	
+	<select id="findByParent"  resultMap="mpmo-result" >
+		select * from M_PROCEDURE_MODULE where PARENT_ID=#{id}
+	</select>
+	
+	<select id="findByParentId" resultMap="mpro-result">
+		select * from M_PROCEDURE
+		where PARENT_ID=#{parentId}
+	</select>
+	
+	<select id="findMprocedure" resultMap="mpro-result">
+		select * from M_PROCEDURE where ID=#{id,jdbcType=NUMERIC} 
+	</select>
+
+	<sql id="pageSQLHead">
+		select MANUFACTURE_ID, PRODUCT_ID,
+		PRODUCT_NAME, AMOUNT,
+		APPLY_ID_GROUP, REGISTER_TIME, CHECK_TAG from
+		(select
+		row_number() over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'manufactureId'">m.MANUFACTURE_ID</when>
+				<when test="sort == 'productid'">m.PRODUCT_ID</when>
+				<when test="sort == 'productname'">m.PRODUCT_NAME</when>
+				<when test="sort == 'registerTime'">m.REGISTER_TIME</when>
+				<otherwise>m.MANUFACTURE_ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereClase">
+		<where>
+			m.ID=s.MaId
+			<if test="null!=manufactureProcedureTag and ''!=manufactureProcedureTag">
+				and m.MANUFACTURE_PROCEDURE_TAG =
+				#{manufactureProcedureTag}
+			</if>
+			<if test="null!=storeTag and ''!=storeTag">
+				and s.STORE_TAG = #{storeTag}
+			</if>
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="manu-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,m.MANUFACTURE_ID, m.PRODUCT_ID,
+		m.PRODUCT_NAME, m.AMOUNT,
+		m.APPLY_ID_GROUP, m.REGISTER_TIME, m.CHECK_TAG from M_MANUFACTURE
+		m,S_GATHER s
+		<include refid="WhereClase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(m.ID) from M_MANUFACTURE m,S_GATHER s
+		<include refid="WhereClase" />
+	</select>
+
+	<select id="findByMid" resultMap="manu-result">
+		select * from M_MANUFACTURE
+		where MANUFACTURE_ID=#{manufactureId}
+	</select>
+	
+	<select id="findById" resultMap="manu-result">
+		select * from M_MANUFACTURE
+		where ID=#{id}
+	</select>
+	
+	<resultMap type="com.softfactory.pojo.Mproceduring" id="during-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="procedureId" column="PROCEDURE_ID" />
+		<result property="procedureName" column="PROCEDURE_NAME" />
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT" />	
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="rocedureDescribe" column="PROCEDURE_DESCRIBE" />
+		<result property="regCount" column="REG_COUNT" />
+		<result property="procedureResponsiblePerson" column="PROCEDURE_RESPONSIBLE_PERSON" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="checker" column="CHECKER" />
+		<result property="checkTime" column="CHECK_TIME" />
+	</resultMap>
+	<select id="findMproceduring" resultMap="during-result">
+		select * from M_PROCEDURING where PROCEDURE_ID=#{procedureId}
+	</select>
+	
+	<select id="findByMproceduring" resultMap="during-result">
+		select * from M_PROCEDURING where PARENT_ID=#{id}
+	</select>
+		
+	<resultMap type="com.softfactory.pojo.MpModuling" id="duling-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="subtotal" column="SUBTOTAL" />	
+	</resultMap>
+	<select id="findMpModuling" resultMap="duling-result">
+		select * from M_PROCEDURE_MODULING where PARENT_ID=#{parentId}
+	</select>
+
+</mapper>

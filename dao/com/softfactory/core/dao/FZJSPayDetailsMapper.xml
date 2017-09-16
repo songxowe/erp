@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.FZJSPayDetailsMapper">
+
+	<resultMap type="com.softfactory.pojo.SPayDetails" id="spaydetails-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="productDescribe" column="PRODUCT_DESCRIBE" />
+		<result property="amount" column="AMOUNT" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="paidAmount" column="PAID_AMOUNT" />
+		<result property="payTag" column="PAY_TAG" />
+	</resultMap>
+	
+	<resultMap type="com.softfactory.pojo.Dfile" id="dfile-result">
+		<id property="id" column="ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="realCostPrice" column="REAL_COST_PRICE" />
+		<result property="productDescibe" column="PRODUCT_DESCRIBE" />
+		<result property="designCellTag" column="DESIGN_CELL_TAG" />
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select ID,PARENT_ID,PRODUCT_ID,PRODUCT_NAME,PRODUCT_DESCRIBE,AMOUNT,AMOUNT_UNIT,COST_PRICE,SUBTOTAL,PAID_AMOUNT,PAY_TAG from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'id'">ID</when>
+				<when test="sort == 'parentId'">PARENT_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<when test="sort == 'productDescribe'">PRODUCT_DESCRIBE</when>
+				<when test="sort == 'amount'">AMOUNT</when>
+				<when test="sort == 'amountUnit'">AMOUNT_UNIT</when>
+				<when test="sort == 'costPrice'">COST_PRICE</when>
+				<when test="sort == 'subtotal'">SUBTOTAL</when>
+				<when test="sort == 'paidAmount'">PAID_AMOUNT</when>
+				<when test="sort == 'payTag'">PAY_TAG</when>
+				<otherwise>PRODUCT_ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			1=1
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="spaydetails-result">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		) rn,e.* from S_PAY_DETAILS e
+		<include refid="WhereCase"/>
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(id) from S_PAY_DETAILS
+		<include refid="WhereCase" />
+	</select>
+</mapper>

@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.softfactory.core.dao.ScMdProcedureMapper">
+
+	<resultMap type="com.softfactory.pojo.MdProcedure" id="mdProcedureMap">
+		<id property="id" column="ID" />
+		<result property="designId" column="DESIGN_ID" />
+		<result property="productId" column="PRODUCT_ID" />
+		<result property="productName" column="PRODUCT_NAME" />
+		<result property="designer" column="DESIGNER" />
+		<result property="registerTime" column="REGISTER_TIME" javaType="java.util.Date" />
+		<result property="costPriceSum" column="COST_PRICE_SUM" />
+		<result property="procedureDescribe" column="PROCEDURE_DESCRIBE" />
+		<result property="moduleCostPriceSum" column="MODULE_COST_PRICE_SUM" />
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG" />
+		<result property="checkTag" column="CHECK_TAG" />
+	</resultMap>
+
+	<sql id="pageSQLHead">
+		select * from
+		(select
+		row_number()
+		over(
+	</sql>
+
+	<sql id="orderBy">
+		<if test="sort != null and order != null">
+			order by
+			<choose>
+				<when test="sort == 'designId'">DESIGN_ID</when>
+				<when test="sort == 'productId'">PRODUCT_ID</when>
+				<when test="sort == 'productName'">PRODUCT_NAME</when>
+				<when test="sort == 'designer'">DESIGNER</when>
+				<when test="sort == 'sregisterTimeal'">REGISTER_TIME</when>
+				<when test="sort == 'costPriceSum'">COST_PRICE_SUM</when>
+				<otherwise>PRODUCT_ID</otherwise>
+			</choose>
+
+			<if test="order == 'asc'">asc</if>
+			<if test="order == 'desc'">desc</if>
+		</if>
+	</sql>
+
+	<sql id="WhereCase">
+		<where>
+			DESIGN_MODULE_TAG='G002-0'and CHECK_TAG='S001-1'
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>			
+		</where>
+	</sql>
+	
+	<sql id="WhereCase1">
+		<where>
+			DESIGN_MODULE_TAG='G002-1'and CHECK_TAG='S001-1'
+			<if test="productId != null and productId != ''">
+				and PRODUCT_ID LIKE #{productId}
+			</if>			
+		</where>
+	</sql>
+
+	<sql id="pageSQLFoot">
+    <![CDATA[ ) where rn > #{pageno} and rn <= #{pagesize} ]]>
+	</sql>
+
+	<select id="findPager" resultMap="mdProcedureMap">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		)rn, ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,DESIGNER,REGISTER_TIME,
+		COST_PRICE_SUM,PROCEDURE_DESCRIBE,MODULE_COST_PRICE_SUM from M_DESIGN_PROCEDURE 
+		<include refid="WhereCase" />
+		<include refid="pageSQLFoot" />
+	</select>
+
+	<select id="findPagerTotal" resultType="long">
+		select count(DESIGN_ID) from M_DESIGN_PROCEDURE
+		<include refid="WhereCase" />
+	</select>
+	
+	<select id="findPagerTotal1" resultType="long">
+		select count(DESIGN_ID) from M_DESIGN_PROCEDURE
+		<include refid="WhereCase1" />
+	</select>
+	
+	<select id="findPagerTotal2" resultType="long">
+		select count(DESIGN_ID) from M_DESIGN_PROCEDURE
+	</select>
+	
+	
+		<select id="findPager1" resultMap="mdProcedureMap">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		)rn, ID,DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,DESIGNER,REGISTER_TIME,
+		COST_PRICE_SUM,PROCEDURE_DESCRIBE,MODULE_COST_PRICE_SUM from M_DESIGN_PROCEDURE 
+		<include refid="WhereCase1" />
+		<include refid="pageSQLFoot" />
+	</select>
+	
+	<select id="findPager2" resultMap="mdProcedureMap">
+		<include refid="pageSQLHead" />
+		<include refid="orderBy" />
+		)rn, DESIGN_ID,PRODUCT_ID,PRODUCT_NAME,DESIGN_MODULE_TAG,CHECK_TAG from M_DESIGN_PROCEDURE 
+		<include refid="pageSQLFoot" />
+	</select>
+	
+	<resultMap type="com.softfactory.pojo.MdesignProcedureDetails" id="mdesignProcedureDetails-result">
+		<id property="id" column="ID" />
+		<result property="parentId" column="PARENT_ID" />
+		<result property="detailsNumber" column="DETAILS_NUMBER" />
+		<result property="procedureId" column="PROCEDURE_ID" />
+		<result property="procedureName" column="PROCEDURE_NAME" />
+		<result property="labourHourAmount" column="LABOUR_HOUR_AMOUNT" />
+		<result property="procedureDescribe" column="PROCEDURE_DESCRIBE" />
+		<result property="amountUnit" column="AMOUNT_UNIT" />
+		<result property="costPrice" column="COST_PRICE" />
+		<result property="subtotal" column="SUBTOTAL" />
+		<result property="moduleSubtotal" column="MODULE_SUBTOTAL" />
+		<result property="register" column="REGISTER" />
+		<result property="registerTime" column="REGISTER_TIME" />
+		<result property="designModuleTag" column="DESIGN_MODULE_TAG" />
+		<result property="designModuleChangeTag" column="DESIGN_MODULE_CHANGE_TAG" />
+	</resultMap>
+	
+	<select id="findMdesignProcedureDetails" resultMap="mdesignProcedureDetails-result">
+		select * from M_DESIGN_PROCEDURE_DETAILS where PARENT_ID=#{id}
+	</select>
+</mapper>
